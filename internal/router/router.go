@@ -11,6 +11,7 @@ type Handlers struct {
 	Health *handler.HealthHandler
 	Auth   *handler.AuthHandler
 	User   *handler.UserHandler
+	Video  *handler.VideoHandler
 }
 
 func NewRouter(h *Handlers, jwtSecret string) *gin.Engine {
@@ -30,11 +31,19 @@ func NewRouter(h *Handlers, jwtSecret string) *gin.Engine {
 		}
 
 		userGroup := api.Group("/users")
-		userGroup.Use(middleware.Auth(jwtSecret))
 		{
+			userGroup.GET("/:id/videos", h.Video.ListUserVideos)
+
+			userGroup.Use(middleware.Auth(jwtSecret))
 			userGroup.GET("/me", h.User.Me)
 		}
 
+		videoGroup := api.Group("/videos")
+		{
+			videoGroup.GET("/:id", h.Video.Detail)
+			videoGroup.Use(middleware.Auth(jwtSecret))
+			videoGroup.POST("", h.Video.Create)
+		}
 	}
 
 	return r

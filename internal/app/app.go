@@ -39,18 +39,22 @@ func New() (*App, error) {
 	}
 
 	userRepo := repository.NewUserRepository(db)
+	videoRepo := repository.NewVideoRepository(db)
 
 	authService := service.NewAuthService(userRepo, cfg.JWT.Secret, cfg.JWT.ExpireHours)
 	userService := service.NewUserService(userRepo)
+	videoService := service.NewVideoService(videoRepo, userRepo)
 
 	healthHandler := handler.NewHealthHandler()
 	authHandler := handler.NewAuthHandler(authService)
 	userHandler := handler.NewUserHandler(userService)
+	videoHandler := handler.NewVideoHandler(videoService)
 
 	engine := router.NewRouter(&router.Handlers{
 		Health: healthHandler,
 		Auth:   authHandler,
 		User:   userHandler,
+		Video:  videoHandler,
 	}, cfg.JWT.Secret)
 
 	return &App{
