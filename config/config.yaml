@@ -1,0 +1,20 @@
+app:
+  name: video-feed
+  port: 8080
+  mode: debug
+
+mysql:
+  host: 127.0.0.1
+  port: 3306
+  user: root
+  password: a992699A
+  dbname: video_feed
+  max_open_conns: 20
+  max_idle_conns: 10
+
+jwt:
+  secret: video-feed-secret
+  expire_hours: 72
+
+log:
+  level: info
