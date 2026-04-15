@@ -50,7 +50,7 @@ video-feed
 │  └─ service
 ├─ migrations
 ├─ pkg
-│  ├─ errno
+│  ├─ errorno
 │  │  └─ errorno.go
 │  ├─ jwt
 │  ├─ logger

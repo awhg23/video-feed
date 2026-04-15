@@ -3,36 +3,38 @@ package middleware
 import (
 	"strings"
 
-	"github.com/gin-gonic/gin"
-
+	jwtpkg "video-feed/pkg/jwt"
 	"video-feed/pkg/response"
+
+	"github.com/gin-gonic/gin"
 )
 
-func Auth() gin.HandlerFunc {
+func Auth(secret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			response.Error(c, 1002, "unauthorized: missing token")
+			response.Error(c, 1002, "unauthorized")
 			c.Abort()
 			return
 		}
 
 		if !strings.HasPrefix(authHeader, "Bearer ") {
-			response.Error(c, 1002, "unauthorized: invalid token format")
+			response.Error(c, 1002, "invalid token format")
 			c.Abort()
 			return
 		}
 
-		token := strings.TrimPrefix(authHeader, "Bearer ")
-		if token == "" {
-			response.Error(c, 1002, "unauthorized: empty token")
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+		claims, err := jwtpkg.ParseToken(secret, tokenString)
+		if err != nil {
+			response.Error(c, 1002, "invalid token")
 			c.Abort()
 			return
 		}
 
 		// 这里先简单验证 token 是否存在，后续再完善 JWT 验证逻辑
 
-		c.Set("userID", int64(1))
+		c.Set("user_id", claims.UserID)
 		c.Next()
 	}
 }
