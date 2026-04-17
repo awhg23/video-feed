@@ -1,9 +1,12 @@
 package service
 
 import (
+	"errors"
 	"video-feed/internal/dto"
 	"video-feed/internal/repository"
 )
+
+var ErrUserNotFound = errors.New("user not found")
 
 type UserService struct {
 	userRepo *repository.UserRepository
@@ -16,6 +19,9 @@ func NewUserService(userRepo *repository.UserRepository) *UserService {
 func (s *UserService) GetProfile(userID uint64) (*dto.UserProfileResponse, error) {
 	user, err := s.userRepo.GetByID(userID)
 	if err != nil {
+		if repository.IsNotFound(err) {
+			return nil, ErrUserNotFound
+		}
 		return nil, err
 	}
 

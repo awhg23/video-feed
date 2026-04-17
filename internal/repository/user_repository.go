@@ -48,3 +48,18 @@ func (r *UserRepository) ExistsByUsername(username string) (bool, error) {
 func IsNotFound(err error) bool {
 	return errors.Is(err, gorm.ErrRecordNotFound)
 }
+
+// 4.17 增加按id批量查找
+func (r *UserRepository) GetByIDs(ids []uint64) ([]model.User, error) {
+	if len(ids) == 0 {
+		return []model.User{}, nil
+	}
+
+	var users []model.User
+	err := r.db.Where("id IN ?", ids).Find(&users).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
