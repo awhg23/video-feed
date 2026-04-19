@@ -13,6 +13,7 @@ type Handlers struct {
 	User   *handler.UserHandler
 	Video  *handler.VideoHandler
 	Follow *handler.FollowHandler
+	Like   *handler.LikeHandler
 }
 
 func NewRouter(h *Handlers, jwtSecret string) *gin.Engine {
@@ -49,6 +50,8 @@ func NewRouter(h *Handlers, jwtSecret string) *gin.Engine {
 
 			videoGroup.Use(middleware.Auth(jwtSecret))
 			videoGroup.POST("", h.Video.Create)
+			videoGroup.POST("/:id/like", h.Like.Like)
+			videoGroup.DELETE("/:id/like", h.Like.Unlike)
 		}
 	}
 
