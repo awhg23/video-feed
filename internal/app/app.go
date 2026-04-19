@@ -42,12 +42,14 @@ func New() (*App, error) {
 	videoRepo := repository.NewVideoRepository(db)
 	followRepo := repository.NewFollowRepository(db)
 	likeRepo := repository.NewVideoLikeRepository(db)
+	commentRepo := repository.NewCommentRepository(db)
 
 	authService := service.NewAuthService(userRepo, cfg.JWT.Secret, cfg.JWT.ExpireHours)
 	userService := service.NewUserService(userRepo)
 	videoService := service.NewVideoService(videoRepo, userRepo)
 	followService := service.NewFollowService(followRepo, userRepo)
 	likeService := service.NewLikeService(db, likeRepo, videoRepo)
+	commentService := service.NewCommentService(db, commentRepo, videoRepo, userRepo)
 
 	healthHandler := handler.NewHealthHandler()
 	authHandler := handler.NewAuthHandler(authService)
@@ -55,14 +57,16 @@ func New() (*App, error) {
 	videoHandler := handler.NewVideoHandler(videoService)
 	followHandler := handler.NewFollowHandler(followService)
 	likeHandler := handler.NewLikeHandler(likeService)
+	commentHandler := handler.NewCommentHandler(commentService)
 
 	engine := router.NewRouter(&router.Handlers{
-		Health: healthHandler,
-		Auth:   authHandler,
-		User:   userHandler,
-		Video:  videoHandler,
-		Follow: followHandler,
-		Like:   likeHandler,
+		Health:  healthHandler,
+		Auth:    authHandler,
+		User:    userHandler,
+		Video:   videoHandler,
+		Follow:  followHandler,
+		Like:    likeHandler,
+		Comment: commentHandler,
 	}, cfg.JWT.Secret)
 
 	return &App{

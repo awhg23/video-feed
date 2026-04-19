@@ -8,12 +8,13 @@ import (
 )
 
 type Handlers struct {
-	Health *handler.HealthHandler
-	Auth   *handler.AuthHandler
-	User   *handler.UserHandler
-	Video  *handler.VideoHandler
-	Follow *handler.FollowHandler
-	Like   *handler.LikeHandler
+	Health  *handler.HealthHandler
+	Auth    *handler.AuthHandler
+	User    *handler.UserHandler
+	Video   *handler.VideoHandler
+	Follow  *handler.FollowHandler
+	Like    *handler.LikeHandler
+	Comment *handler.CommentHandler
 }
 
 func NewRouter(h *Handlers, jwtSecret string) *gin.Engine {
@@ -47,11 +48,13 @@ func NewRouter(h *Handlers, jwtSecret string) *gin.Engine {
 		videoGroup := api.Group("/videos")
 		{
 			videoGroup.GET("/:id", h.Video.Detail)
+			videoGroup.GET("/:id/comments", h.Comment.List)
 
 			videoGroup.Use(middleware.Auth(jwtSecret))
 			videoGroup.POST("", h.Video.Create)
 			videoGroup.POST("/:id/like", h.Like.Like)
 			videoGroup.DELETE("/:id/like", h.Like.Unlike)
+			videoGroup.POST("/:id/comments", h.Comment.Create)
 		}
 	}
 

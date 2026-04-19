@@ -61,3 +61,15 @@ func (r *VideoRepository) DecrLikeCount(videoID uint64) error {
 		Where("id = ? AND status = ?", videoID, 1).
 		UpdateColumn("like_count", gorm.Expr("like_count - 1")).Error
 }
+
+func (r *VideoRepository) IncrCommentCount(videoID uint64) error {
+	return r.db.Model(&model.Video{}).
+		Where("id = ? AND status = ?", videoID, 1).
+		UpdateColumn("comment_count", gorm.Expr("comment_count + 1")).Error
+}
+
+func (r *VideoRepository) DecrCommentCount(videoID uint64) error {
+	return r.db.Model(&model.Video{}).
+		Where("id = ? AND status = ?", videoID, 1).
+		UpdateColumn("comment_count", gorm.Expr("comment_count - 1")).Error
+}
