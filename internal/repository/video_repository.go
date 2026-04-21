@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"time"
 	"video-feed/internal/model"
 
 	"gorm.io/gorm"
@@ -72,4 +73,29 @@ func (r *VideoRepository) DecrCommentCount(videoID uint64) error {
 	return r.db.Model(&model.Video{}).
 		Where("id = ? AND status = ?", videoID, 1).
 		UpdateColumn("comment_count", gorm.Expr("comment_count - 1")).Error
+}
+
+func (r *VideoRepository) ListFeedByAuthorIDs(authorIDs []uint64, cursorTime *time.Time, cursorID *uint64, limit int) ([]*model.Video, error) {
+	if len(authorIDs) == 0 {
+		return []*model.Video{}, nil
+	}
+
+	db := r.db.Where("author_id IN ? AND status = ?", authorIDs, 1)
+
+	if cursorTime != nil && cursorID != nil {
+		db = db.Where(
+			"(created_at < ?) OR (created_at = ? AND id < ?)",
+			*cursorTime, *cursorTime, *cursorID,
+		)
+	}
+
+	var videos []*model.Video
+	err := db.Order("created_at DESC, id DESC").
+		Limit(limit).
+		Find(&videos).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return videos, nil
 }

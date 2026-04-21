@@ -50,6 +50,7 @@ func New() (*App, error) {
 	followService := service.NewFollowService(followRepo, userRepo)
 	likeService := service.NewLikeService(db, likeRepo, videoRepo)
 	commentService := service.NewCommentService(db, commentRepo, videoRepo, userRepo)
+	feedService := service.NewFeedService(followRepo, videoRepo, userRepo)
 
 	healthHandler := handler.NewHealthHandler()
 	authHandler := handler.NewAuthHandler(authService)
@@ -58,6 +59,7 @@ func New() (*App, error) {
 	followHandler := handler.NewFollowHandler(followService)
 	likeHandler := handler.NewLikeHandler(likeService)
 	commentHandler := handler.NewCommentHandler(commentService)
+	feedHandler := handler.NewFeedHandler(feedService)
 
 	engine := router.NewRouter(&router.Handlers{
 		Health:  healthHandler,
@@ -67,6 +69,7 @@ func New() (*App, error) {
 		Follow:  followHandler,
 		Like:    likeHandler,
 		Comment: commentHandler,
+		Feed:    feedHandler,
 	}, cfg.JWT.Secret)
 
 	return &App{

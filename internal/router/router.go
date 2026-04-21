@@ -15,6 +15,7 @@ type Handlers struct {
 	Follow  *handler.FollowHandler
 	Like    *handler.LikeHandler
 	Comment *handler.CommentHandler
+	Feed    *handler.FeedHandler
 }
 
 func NewRouter(h *Handlers, jwtSecret string) *gin.Engine {
@@ -55,6 +56,12 @@ func NewRouter(h *Handlers, jwtSecret string) *gin.Engine {
 			videoGroup.POST("/:id/like", h.Like.Like)
 			videoGroup.DELETE("/:id/like", h.Like.Unlike)
 			videoGroup.POST("/:id/comments", h.Comment.Create)
+		}
+
+		feedGroup := api.Group("/feed")
+		feedGroup.Use(middleware.Auth(jwtSecret))
+		{
+			feedGroup.GET("/following", h.Feed.Following)
 		}
 	}
 
