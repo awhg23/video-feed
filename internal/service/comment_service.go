@@ -86,11 +86,30 @@ func (s *CommentService) ListComments(videoID uint64) (*dto.CommentListResponse,
 		return nil, err
 	}
 
+	userIDs := make([]uint64, 0, len(comments))
+	for _, comment := range comments {
+		userIDs = append(userIDs, comment.UserID)
+	}
+
+	userIDs = uniqueUint64(userIDs)
+
+	users, err := s.userRepo.GetByIDs(userIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	userMap := make(map[uint64]model.User, len(users))
+	for _, user := range users {
+		userMap[user.ID] = user
+	}
+
 	list := make([]dto.CommentItem, 0, len(comments))
 	for _, comment := range comments {
-		user, err := s.userRepo.GetByID(comment.UserID)
-		if err != nil {
-			return nil, err
+		user, ok := userMap[comment.UserID]
+		if !ok {
+			// 理论上不该发生，除非评论关联的用户被删了。
+			// V1 先跳过，避免整个评论列表失败。
+			continue
 		}
 
 		list = append(list, dto.CommentItem{

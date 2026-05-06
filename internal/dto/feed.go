@@ -7,7 +7,7 @@ type FeedItem struct {
 	Title        string      `json:"title"`
 	Description  string      `json:"description"`
 	VideoURL     string      `json:"video_url"`
-	CoberURL     string      `json:"cover_url"`
+	CoverURL     string      `json:"cover_url"`
 	LikeCount    uint64      `json:"like_count"`
 	CommentCount uint64      `json:"comment_count"`
 	Author       VideoAuthor `json:"author"`
