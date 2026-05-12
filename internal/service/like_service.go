@@ -6,6 +6,8 @@ import (
 	"video-feed/internal/model"
 	"video-feed/internal/repository"
 
+	"github.com/redis/go-redis/v9"
+
 	"gorm.io/gorm"
 )
 
@@ -15,16 +17,18 @@ var (
 )
 
 type LikeService struct {
-	likeRepo  *repository.VideoLikeRepository
-	videoRepo *repository.VideoRepository
-	db        *gorm.DB
+	likeRepo    *repository.VideoLikeRepository
+	videoRepo   *repository.VideoRepository
+	db          *gorm.DB
+	redisClient *redis.Client
 }
 
-func NewLikeService(db *gorm.DB, likeRepo *repository.VideoLikeRepository, videoRepo *repository.VideoRepository) *LikeService {
+func NewLikeService(db *gorm.DB, likeRepo *repository.VideoLikeRepository, videoRepo *repository.VideoRepository, redisClient *redis.Client) *LikeService {
 	return &LikeService{
-		likeRepo:  likeRepo,
-		videoRepo: videoRepo,
-		db:        db,
+		likeRepo:    likeRepo,
+		videoRepo:   videoRepo,
+		db:          db,
+		redisClient: redisClient,
 	}
 }
 
@@ -45,7 +49,7 @@ func (s *LikeService) Like(userID, videoID uint64) error {
 		return ErrAlreadyLiked
 	}
 
-	return s.db.Transaction(func(tx *gorm.DB) error {
+	err = s.db.Transaction(func(tx *gorm.DB) error {
 		likeRepo := repository.NewVideoLikeRepository(tx)
 		videoRepo := repository.NewVideoRepository(tx)
 
@@ -62,6 +66,13 @@ func (s *LikeService) Like(userID, videoID uint64) error {
 
 		return nil
 	})
+	if err != nil {
+		return err
+	}
+
+	deleteVideoDetailCache(s.redisClient, videoID)
+
+	return nil
 }
 
 func (s *LikeService) Unlike(userID, videoID uint64) error {
@@ -81,7 +92,7 @@ func (s *LikeService) Unlike(userID, videoID uint64) error {
 		return ErrNotLiked
 	}
 
-	return s.db.Transaction(func(tx *gorm.DB) error {
+	err = s.db.Transaction(func(tx *gorm.DB) error {
 		likeRepo := repository.NewVideoLikeRepository(tx)
 		videoRepo := repository.NewVideoRepository(tx)
 
@@ -95,4 +106,11 @@ func (s *LikeService) Unlike(userID, videoID uint64) error {
 
 		return nil
 	})
+	if err != nil {
+		return err
+	}
+
+	deleteVideoDetailCache(s.redisClient, videoID)
+
+	return nil
 }

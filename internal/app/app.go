@@ -54,8 +54,8 @@ func New() (*App, error) {
 	userService := service.NewUserService(userRepo)
 	videoService := service.NewVideoService(videoRepo, userRepo, redisClient, time.Duration(cfg.Redis.VideoDetailTTLSeconds)*time.Second)
 	followService := service.NewFollowService(followRepo, userRepo)
-	likeService := service.NewLikeService(db, likeRepo, videoRepo)
-	commentService := service.NewCommentService(db, commentRepo, videoRepo, userRepo)
+	likeService := service.NewLikeService(db, likeRepo, videoRepo, redisClient)
+	commentService := service.NewCommentService(db, commentRepo, videoRepo, userRepo, redisClient)
 	feedService := service.NewFeedService(followRepo, videoRepo, userRepo)
 
 	healthHandler := handler.NewHealthHandler()

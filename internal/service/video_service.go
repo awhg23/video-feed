@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -49,10 +48,6 @@ func (s *VideoService) CreateVideo(userID uint64, req *dto.CreateVideoRequest) (
 	}
 
 	return video.ID, nil
-}
-
-func videoDetailCacheKey(videoID uint64) string {
-	return fmt.Sprintf("video:detail:%d", videoID)
 }
 
 func (s *VideoService) GetVideoDetail(videoID uint64) (*dto.VideoDetailResponse, error) {

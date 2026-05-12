@@ -8,6 +8,7 @@ import (
 	"video-feed/internal/model"
 	"video-feed/internal/repository"
 
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -18,14 +19,16 @@ type CommentService struct {
 	videoRepo   *repository.VideoRepository
 	userRepo    *repository.UserRepository
 	db          *gorm.DB
+	redisClient *redis.Client
 }
 
-func NewCommentService(db *gorm.DB, commentRepo *repository.CommentRepository, videoRepo *repository.VideoRepository, userRepo *repository.UserRepository) *CommentService {
+func NewCommentService(db *gorm.DB, commentRepo *repository.CommentRepository, videoRepo *repository.VideoRepository, userRepo *repository.UserRepository, redisClient *redis.Client) *CommentService {
 	return &CommentService{
 		commentRepo: commentRepo,
 		videoRepo:   videoRepo,
 		userRepo:    userRepo,
 		db:          db,
+		redisClient: redisClient,
 	}
 }
 
@@ -68,6 +71,8 @@ func (s *CommentService) CreateComment(userID, videoID uint64, req *dto.CreateCo
 	if err != nil {
 		return 0, err
 	}
+
+	deleteVideoDetailCache(s.redisClient, videoID)
 
 	return commentID, nil
 }
