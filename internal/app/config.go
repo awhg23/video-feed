@@ -3,6 +3,7 @@ package app
 type Config struct {
 	App   AppConfig   `mapstructure:"app"`
 	MySQL MySQLConfig `mapstructure:"mysql"`
+	Redis RedisConfig `mapstructure:"redis"`
 	JWT   JWTConfig   `mapstructure:"jwt"`
 	Log   LogConfig   `mapstructure:"log"`
 }
@@ -21,6 +22,13 @@ type MySQLConfig struct {
 	Dbname       string `mapstructure:"dbname"`
 	MaxOpenConns int    `mapstructure:"max_open_conns"`
 	MaxIdleConns int    `mapstructure:"max_idle_conns"`
+}
+
+type RedisConfig struct {
+	Addr                  string `mapstructure:"addr"`
+	Password              string `mapstructure:"password"`
+	DB                    int    `mapstructure:"db"`
+	VideoDetailTTLSeconds int    `mapstructure:"video_detail_ttl_seconds"`
 }
 
 type JWTConfig struct {

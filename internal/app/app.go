@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -38,6 +39,11 @@ func New() (*App, error) {
 		return nil, err
 	}
 
+	redisClient, err := NewRedisClient(cfg.Redis)
+	if err != nil {
+		return nil, err
+	}
+
 	userRepo := repository.NewUserRepository(db)
 	videoRepo := repository.NewVideoRepository(db)
 	followRepo := repository.NewFollowRepository(db)
@@ -46,7 +52,7 @@ func New() (*App, error) {
 
 	authService := service.NewAuthService(userRepo, cfg.JWT.Secret, cfg.JWT.ExpireHours)
 	userService := service.NewUserService(userRepo)
-	videoService := service.NewVideoService(videoRepo, userRepo)
+	videoService := service.NewVideoService(videoRepo, userRepo, redisClient, time.Duration(cfg.Redis.VideoDetailTTLSeconds)*time.Second)
 	followService := service.NewFollowService(followRepo, userRepo)
 	likeService := service.NewLikeService(db, likeRepo, videoRepo)
 	commentService := service.NewCommentService(db, commentRepo, videoRepo, userRepo)

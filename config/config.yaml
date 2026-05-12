@@ -18,3 +18,9 @@ jwt:
 
 log:
   level: info
+
+redis:
+  addr: 127.0.0.1:6379
+  password: ""
+  db: 0
+  video_detail_ttl_seconds: 300

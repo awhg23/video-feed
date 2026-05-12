@@ -1,7 +1,13 @@
 package service
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"time"
+
+	"github.com/redis/go-redis/v9"
 
 	"video-feed/internal/dto"
 	"video-feed/internal/model"
@@ -11,14 +17,18 @@ import (
 var ErrVideoNotFound = errors.New("video not found")
 
 type VideoService struct {
-	videoRepo *repository.VideoRepository
-	userRepo  *repository.UserRepository
+	videoRepo      *repository.VideoRepository
+	userRepo       *repository.UserRepository
+	redisClient    *redis.Client
+	videoDetailTTL time.Duration
 }
 
-func NewVideoService(videoRepo *repository.VideoRepository, userRepo *repository.UserRepository) *VideoService {
+func NewVideoService(videoRepo *repository.VideoRepository, userRepo *repository.UserRepository, redisClient *redis.Client, videoDetailTTL time.Duration) *VideoService {
 	return &VideoService{
-		videoRepo: videoRepo,
-		userRepo:  userRepo,
+		videoRepo:      videoRepo,
+		userRepo:       userRepo,
+		redisClient:    redisClient,
+		videoDetailTTL: videoDetailTTL,
 	}
 }
 
@@ -41,7 +51,28 @@ func (s *VideoService) CreateVideo(userID uint64, req *dto.CreateVideoRequest) (
 	return video.ID, nil
 }
 
+func videoDetailCacheKey(videoID uint64) string {
+	return fmt.Sprintf("video:detail:%d", videoID)
+}
+
 func (s *VideoService) GetVideoDetail(videoID uint64) (*dto.VideoDetailResponse, error) {
+	ctx := context.Background()
+	cacheKey := videoDetailCacheKey(videoID)
+
+	// redis
+	if s.redisClient != nil {
+		cached, err := s.redisClient.Get(ctx, cacheKey).Result()
+		if err == nil {
+			var resp dto.VideoDetailResponse
+			if jsonErr := json.Unmarshal([]byte(cached), &resp); jsonErr == nil {
+				return &resp, nil
+			}
+		} else if err != redis.Nil {
+			// 暂时先忽略，后续记录日志
+		}
+	}
+
+	// mysql
 	video, err := s.videoRepo.GetByID(videoID)
 	if err != nil {
 		if repository.IsNotFound(err) {
@@ -55,7 +86,7 @@ func (s *VideoService) GetVideoDetail(videoID uint64) (*dto.VideoDetailResponse,
 		return nil, err
 	}
 
-	return &dto.VideoDetailResponse{
+	resp := &dto.VideoDetailResponse{
 		ID:           video.ID,
 		Title:        video.Title,
 		Description:  video.Description,
@@ -69,7 +100,17 @@ func (s *VideoService) GetVideoDetail(videoID uint64) (*dto.VideoDetailResponse,
 			Nickname: author.Nickname,
 		},
 		CreatedAt: video.CreatedAt,
-	}, nil
+	}
+
+	// 写入 redis
+	if s.redisClient != nil {
+		bytes, err := json.Marshal(resp)
+		if err == nil {
+			_ = s.redisClient.Set(ctx, cacheKey, string(bytes), s.videoDetailTTL).Err()
+		}
+	}
+
+	return resp, nil
 }
 
 func (s *VideoService) ListUserVideos(userID uint64, page, pageSize int) (*dto.UserVideoListResponse, error) {
