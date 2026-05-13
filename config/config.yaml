@@ -5,9 +5,9 @@ app:
 
 mysql:
   host: 127.0.0.1
-  port: 3306
+  port: 13306
   user: root
-  password: a992699A
+  password: $MYSQL_ROOT_PASSWORD
   dbname: video_feed
   max_open_conns: 20
   max_idle_conns: 10
@@ -20,7 +20,7 @@ log:
   level: info
 
 redis:
-  addr: 127.0.0.1:6379
+  addr: 127.0.0.1:16379
   password: ""
   db: 0
   video_detail_ttl_seconds: 300
