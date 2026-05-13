@@ -19,6 +19,16 @@ func NewFeedHandler(feedService *service.FeedService) *FeedHandler {
 	return &FeedHandler{feedService: feedService}
 }
 
+// Following 关注 Feed
+// @Summary 获取关注 Feed
+// @Description 获取当前登录用户关注作者发布的视频流，使用 cursor 分页
+// @Tags Feed
+// @Produce json
+// @Security BearerAuth
+// @Param cursor query string false "游标，第一页不传"
+// @Param limit query int false "每页数量，默认 10，最大 50"
+// @Success 200 {object} response.Resp
+// @Router /feed/following [get]
 func (h *FeedHandler) Following(c *gin.Context) {
 	userIDValue, exists := c.Get("user_id")
 	if !exists {

@@ -1,0 +1,23 @@
+FROM golang:1.25-alpine AS builder
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+RUN go build -o video-feed ./cmd/server
+
+FROM alpine:3.20
+
+WORKDIR /app
+
+COPY --from=builder /app/video-feed ./video-feed
+COPY --from=builder /app/config ./config
+
+RUN cp ./config/config.docker.yaml ./config/config.yaml
+
+EXPOSE 8080
+
+CMD ["./video-feed"]

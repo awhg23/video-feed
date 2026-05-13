@@ -5,6 +5,10 @@ import (
 	"video-feed/internal/middleware"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "video-feed/docs"
 )
 
 type Handlers struct {
@@ -24,6 +28,7 @@ func NewRouter(h *Handlers, jwtSecret string) *gin.Engine {
 	r.Use(middleware.Logger())
 	r.Use(middleware.Recovery())
 
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	api := r.Group("/api/v1")
 	{
 		api.GET("/ping", h.Health.Ping)

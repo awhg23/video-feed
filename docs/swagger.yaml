@@ -1,0 +1,190 @@
+basePath: /api/v1
+definitions:
+  dto.CreateVideoRequest:
+    properties:
+      cover_url:
+        maxLength: 255
+        type: string
+      description:
+        maxLength: 500
+        type: string
+      title:
+        maxLength: 128
+        minLength: 1
+        type: string
+      video_url:
+        maxLength: 255
+        type: string
+    required:
+    - title
+    - video_url
+    type: object
+  dto.LoginRequest:
+    properties:
+      password:
+        maxLength: 64
+        minLength: 6
+        type: string
+      username:
+        maxLength: 32
+        minLength: 3
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  dto.RegisterRequest:
+    properties:
+      nickname:
+        maxLength: 64
+        minLength: 1
+        type: string
+      password:
+        maxLength: 64
+        minLength: 6
+        type: string
+      username:
+        maxLength: 32
+        minLength: 3
+        type: string
+    required:
+    - nickname
+    - password
+    - username
+    type: object
+  response.Resp:
+    properties:
+      code:
+        type: integer
+      data: {}
+      msg:
+        type: string
+    type: object
+host: localhost:18080
+info:
+  contact:
+    name: awhg23
+    url: https://github.com/awhg23/video-feed
+  description: 短视频社区后端服务，支持用户注册登录、视频发布、关注、点赞、评论和关注 Feed。
+  termsOfService: http://swagger.io/terms/
+  title: video-feed API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: 用户登录后返回 JWT Token
+      parameters:
+      - description: 登录请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Resp'
+      summary: 用户登录
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: 创建新用户账号
+      parameters:
+      - description: 注册请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Resp'
+      summary: 用户注册
+      tags:
+      - Auth
+  /feed/following:
+    get:
+      description: 获取当前登录用户关注作者发布的视频流，使用 cursor 分页
+      parameters:
+      - description: 游标，第一页不传
+        in: query
+        name: cursor
+        type: string
+      - description: 每页数量，默认 10，最大 50
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Resp'
+      security:
+      - BearerAuth: []
+      summary: 获取关注 Feed
+      tags:
+      - Feed
+  /videos:
+    post:
+      consumes:
+      - application/json
+      description: 登录用户发布一个视频
+      parameters:
+      - description: 发布视频请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateVideoRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Resp'
+      security:
+      - BearerAuth: []
+      summary: 发布视频
+      tags:
+      - Video
+  /videos/{id}:
+    get:
+      description: 根据视频 ID 获取视频详情
+      parameters:
+      - description: 视频 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Resp'
+      summary: 视频详情
+      tags:
+      - Video
+securityDefinitions:
+  BearerAuth:
+    description: 输入格式：Bearer {token}
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

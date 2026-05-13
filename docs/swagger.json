@@ -1,0 +1,284 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "短视频社区后端服务，支持用户注册登录、视频发布、关注、点赞、评论和关注 Feed。",
+        "title": "video-feed API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "awhg23",
+            "url": "https://github.com/awhg23/video-feed"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:18080",
+    "basePath": "/api/v1",
+    "paths": {
+        "/auth/login": {
+            "post": {
+                "description": "用户登录后返回 JWT Token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "用户登录",
+                "parameters": [
+                    {
+                        "description": "登录请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Resp"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "description": "创建新用户账号",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "用户注册",
+                "parameters": [
+                    {
+                        "description": "注册请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RegisterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Resp"
+                        }
+                    }
+                }
+            }
+        },
+        "/feed/following": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前登录用户关注作者发布的视频流，使用 cursor 分页",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Feed"
+                ],
+                "summary": "获取关注 Feed",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "游标，第一页不传",
+                        "name": "cursor",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量，默认 10，最大 50",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Resp"
+                        }
+                    }
+                }
+            }
+        },
+        "/videos": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "登录用户发布一个视频",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Video"
+                ],
+                "summary": "发布视频",
+                "parameters": [
+                    {
+                        "description": "发布视频请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateVideoRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Resp"
+                        }
+                    }
+                }
+            }
+        },
+        "/videos/{id}": {
+            "get": {
+                "description": "根据视频 ID 获取视频详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Video"
+                ],
+                "summary": "视频详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "视频 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Resp"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dto.CreateVideoRequest": {
+            "type": "object",
+            "required": [
+                "title",
+                "video_url"
+            ],
+            "properties": {
+                "cover_url": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 500
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 128,
+                    "minLength": 1
+                },
+                "video_url": {
+                    "type": "string",
+                    "maxLength": 255
+                }
+            }
+        },
+        "dto.LoginRequest": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 6
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "minLength": 3
+                }
+            }
+        },
+        "dto.RegisterRequest": {
+            "type": "object",
+            "required": [
+                "nickname",
+                "password",
+                "username"
+            ],
+            "properties": {
+                "nickname": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 1
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 6
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "minLength": 3
+                }
+            }
+        },
+        "response.Resp": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {},
+                "msg": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "输入格式：Bearer {token}",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

@@ -20,6 +20,16 @@ func NewVideoHandler(videoService *service.VideoService) *VideoHandler {
 	return &VideoHandler{videoService: videoService}
 }
 
+// Create 发布视频
+// @Summary 发布视频
+// @Description 登录用户发布一个视频
+// @Tags Video
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body dto.CreateVideoRequest true "发布视频请求"
+// @Success 200 {object} response.Resp
+// @Router /videos [post]
 func (h *VideoHandler) Create(c *gin.Context) {
 	userIDValue, exists := c.Get("user_id")
 	if !exists {
@@ -49,6 +59,14 @@ func (h *VideoHandler) Create(c *gin.Context) {
 	})
 }
 
+// Detail 视频详情
+// @Summary 视频详情
+// @Description 根据视频 ID 获取视频详情
+// @Tags Video
+// @Produce json
+// @Param id path int true "视频 ID"
+// @Success 200 {object} response.Resp
+// @Router /videos/{id} [get]
 func (h *VideoHandler) Detail(c *gin.Context) {
 	videoID, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
