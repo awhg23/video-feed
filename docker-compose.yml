@@ -4,8 +4,8 @@ services:
     container_name: video-feed-mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: video_feed
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-video_feed}
       TZ: Asia/Shanghai
     ports:
       - "13306:3306"
@@ -17,7 +17,7 @@ services:
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_unicode_ci
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-root}"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -48,6 +48,15 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    environment:
+      APP_MODE: release
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DBNAME: ${MYSQL_DATABASE:-video_feed}
+      REDIS_ADDR: redis:6379
+      JWT_SECRET: ${JWT_SECRET:-video-feed-dev-secret}
     ports:
       - "18080:8080"
 

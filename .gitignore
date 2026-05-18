@@ -1,1 +1,22 @@
 文档
+# local config
+config/config.yaml
+config/config.local.yaml
+
+# binary
+video-feed
+*.exe
+
+# logs
+*.log
+logs/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# env
+.env

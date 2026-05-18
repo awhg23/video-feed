@@ -7,13 +7,13 @@ mysql:
   host: mysql
   port: 3306
   user: root
-  password: root
+  password: change-me
   dbname: video_feed
   max_open_conns: 20
   max_idle_conns: 10
 
 jwt:
-  secret: video-feed-secret
+  secret: change-me
   expire_hours: 72
 
 log:
