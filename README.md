@@ -2,12 +2,10 @@
 
 ## 项目简介
 
-`video-feed` 是一个面向短视频社区场景的 Go 后端项目，核心支持用户注册登录、视频发布、关注关系、点赞评论、关注 Feed 流拉取等功能。
+本项目是一个面向短视频社区场景的 Go 后端项目，核心支持用户注册登录、视频发布、关注关系、点赞评论、关注 Feed 流拉取等功能。
 
 项目采用单体架构，基于 Gin + GORM + MySQL + Redis + JWT 实现。  
 第一版 Feed 流采用拉模式，并使用 cursor 分页解决时间流场景下 offset 分页容易重复、漏读的问题。后续在项目中补充了 N+1 查询优化、Redis 视频详情缓存、缓存一致性处理、Docker Compose 环境编排和 Swagger API 文档。
-
-该项目重点不是模拟完整短视频平台，而是围绕一个可控的业务场景，完整实践后端项目从需求分析、表设计、接口设计、分层开发、性能优化到工程化部署的流程。
 
 ---
 
@@ -96,3 +94,13 @@ video-feed
 ├── docker-compose.yml
 ├── go.mod
 └── README.md
+```
+
+## 本地配置
+
+项目不会提交真实配置文件，请先复制示例配置：
+
+```bash
+cp config/config.example.yaml config/config.yaml
+cp .env.example .env
+```
